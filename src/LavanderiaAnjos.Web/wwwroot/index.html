@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lavanderia Anjos</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Sistema interno</p>
+        <h1>Lavanderia Anjos</h1>
+      </div>
+      <span class="environment">Base inicial</span>
+    </header>
+
+    <section class="hero panel">
+      <div>
+        <p class="eyebrow">Estrutura preparada</p>
+        <h2>Gestão simples, segura e disponível na rede local.</h2>
+        <p class="lead">
+          A infraestrutura do sistema está pronta. O cadastro e a importação de clientes
+          serão liberados depois da validação do modelo de dados.
+        </p>
+      </div>
+      <div class="health-card" aria-live="polite">
+        <span class="status-dot" id="status-dot"></span>
+        <div>
+          <strong id="health-title">Verificando serviços…</strong>
+          <p id="health-detail">Aplicação e banco de dados</p>
+        </div>
+        <button id="health-refresh" type="button">Verificar novamente</button>
+      </div>
+    </section>
+
+    <section class="grid" aria-label="Módulos planejados">
+      <article class="panel module-card">
+        <span class="module-number">01</span>
+        <h2>Clientes</h2>
+        <p>Entidade única para empresas e consumidores, sem categorias baseadas na planilha.</p>
+        <span class="badge">Próxima etapa</span>
+      </article>
+      <article class="panel module-card muted-card">
+        <span class="module-number">02</span>
+        <h2>Importação assistida</h2>
+        <p>Pré-visualização, normalização e alertas antes de qualquer gravação no banco.</p>
+        <span class="badge neutral">Planejado</span>
+      </article>
+      <article class="panel module-card muted-card">
+        <span class="module-number">03</span>
+        <h2>Atendimentos</h2>
+        <p>Histórico de serviços separado dos dados cadastrais do cliente.</p>
+        <span class="badge neutral">Planejado</span>
+      </article>
+    </section>
+  </main>
+  <script src="/app.js" defer></script>
+</body>
+</html>

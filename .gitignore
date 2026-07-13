@@ -1,0 +1,28 @@
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Segredos e configuracoes externas
+appsettings.Production.json
+.env
+*.secrets.json
+secrets/
+
+# Publicacao e logs locais
+publish/
+logs/
+*.log
+
+# Dados reais nunca devem ser versionados
+*.xlsx
+dados-reais/*
+!dados-reais/.gitkeep
+!dados-reais/README.md
+importacao/originais/
+
+# Arquivos temporarios do desenvolvimento assistido
+.codex-tmp/
