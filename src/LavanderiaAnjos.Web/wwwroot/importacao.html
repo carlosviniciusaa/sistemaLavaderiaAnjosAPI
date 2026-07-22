@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Importação inicial | Lavanderia Anjos</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="app-header"><div class="header-inner">
+    <a class="brand" href="/clientes"><span class="brand-mark" aria-hidden="true">LA</span><span><strong>Lavanderia Anjos</strong><small>Cadastro de clientes</small></span></a>
+    <nav aria-label="Navegação principal"><a href="/clientes">Clientes</a><a href="/importacao" aria-current="page">Importação inicial</a><a href="/administradores">Administradores</a><span id="session-name" class="session-name"></span><button id="logout-button" class="button ghost" type="button">Sair</button></nav>
+  </div></header>
+  <main class="shell import-shell">
+    <section class="page-heading"><div><p class="eyebrow">Transferência única</p><h1>Importação inicial</h1><p class="muted">Revise cada registro antes de gravar os clientes no sistema.</p></div><a class="button secondary button-link" href="/clientes">Voltar aos clientes</a></section>
+
+    <ol class="stepper" aria-label="Etapas da importação">
+      <li class="active" data-step="1"><span>1</span>Arquivo selecionado</li><li data-step="2"><span>2</span>Pré-visualização</li><li data-step="3"><span>3</span>Confirmação</li><li data-step="4"><span>4</span>Resultado</li>
+    </ol>
+
+    <section id="upload-panel" class="panel import-panel">
+      <div><p class="eyebrow">Etapa 1</p><h2>Selecione a planilha</h2><p class="muted">Somente .xlsx, até 10 MB. O envio gera uma pré-visualização e ainda não cadastra clientes.</p></div>
+      <form id="upload-form"><label class="file-drop">Arquivo .xlsx<input id="file-input" name="arquivo" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required><span id="file-name">Nenhum arquivo selecionado</span></label><button id="preview-button" class="button primary" type="submit">Analisar planilha</button></form>
+      <p id="upload-message" class="form-message" role="alert"></p>
+    </section>
+
+    <section id="preview-panel" hidden>
+      <div class="summary-grid" id="summary-grid" aria-live="polite"></div>
+      <section class="panel metrics-panel"><div class="list-heading"><h2>Conferência física das abas</h2><span id="hash-label" class="muted"></span></div><div id="metrics-table" class="table-wrap"></div></section>
+      <section class="panel preview-list">
+        <div class="list-heading"><div><h2>Registros encontrados</h2><span id="preview-count" class="muted"></span></div><div class="heading-actions"><button id="cancel-lot" class="button secondary danger-action" type="button">Cancelar lote</button><button id="open-confirm" class="button primary" type="button">Revisar confirmação</button></div></div>
+        <div class="import-filters"><label>Exibir<select id="import-filter"><option value="">Todos</option><option value="validos">Válidos</option><option value="alertas">Com alertas</option><option value="invalidos">Inválidos</option><option value="duplicados">Duplicados</option><option value="existentes">Já existentes</option><option value="selecionados">Selecionados</option><option value="ignorados">Ignorados</option></select></label><label class="search-field">Buscar<input id="import-search" type="search" placeholder="Nome, documento, aba ou linha"></label></div>
+        <div id="preview-loading" class="status-state" hidden>Atualizando pré-visualização…</div>
+        <div id="preview-empty" class="status-state" hidden>Nenhum registro corresponde aos filtros.</div>
+        <div id="preview-table-wrap" class="table-wrap"><table class="import-table"><thead><tr><th>Selecionar</th><th>Origem</th><th>Nome</th><th>Documento encontrado</th><th>Normalizado</th><th>Tipo</th><th>Cidade</th><th>Status e problemas</th><th>Ações</th></tr></thead><tbody id="preview-body"></tbody></table></div>
+        <div id="import-pagination" class="pagination"><button id="import-previous" class="button secondary" type="button">Anterior</button><span id="import-page-info"></span><button id="import-next" class="button secondary" type="button">Próxima</button></div>
+      </section>
+    </section>
+
+    <section id="result-panel" class="panel import-panel" hidden><p class="eyebrow">Etapa 4</p><h2>Importação concluída</h2><div id="result-content"></div><div class="heading-actions"><a id="report-link" class="button primary button-link" href="#">Baixar relatório CSV</a><a class="button secondary button-link" href="/clientes">Ver clientes</a></div></section>
+    <section class="panel history-panel"><div class="list-heading"><h2>Histórico resumido</h2></div><div id="history-content" class="status-state">Carregando histórico…</div></section>
+  </main>
+
+  <dialog id="edit-dialog" class="dialog form-dialog"><form id="edit-form" novalidate>
+    <header class="dialog-header"><div><p class="eyebrow">Correção manual</p><h2 id="edit-title">Corrigir registro</h2></div><button id="close-edit" class="icon-button" type="button" aria-label="Fechar">×</button></header>
+    <fieldset><legend>Identificação</legend><div class="form-grid">
+      <label class="span-2">Nome ou razão social <input name="nomeRazaoSocial" maxlength="200" required></label><label>CPF ou CNPJ <input name="documento" maxlength="18" required></label><label>Tipo<input name="tipoPessoa" readonly></label><label>Código legado<input name="codigoLegado" type="number" min="0"></label><label class="checkbox-label"><input name="produtorRural" type="checkbox"> Produtor rural</label><label>Inscrição estadual<input name="inscricaoEstadual" maxlength="30"></label><label>Inscrição municipal<input name="inscricaoMunicipal" maxlength="30"></label><label>Início<input name="dataInicioRelacionamento" type="date"></label>
+    </div></fieldset>
+    <fieldset><legend>Endereço</legend><div class="form-grid"><label>CEP<input name="cep" maxlength="9"></label><label class="span-2">Logradouro<input name="logradouro" maxlength="200"></label><label>Número<input name="numero" maxlength="30"></label><label>Complemento<input name="complemento" maxlength="150"></label><label>Bairro<input name="bairro" maxlength="100"></label><label>Cidade<input name="cidade" maxlength="100"></label><label>UF<input name="uf" maxlength="2"></label></div></fieldset>
+    <fieldset><legend>Contato</legend><div class="form-grid"><label>Telefone<input name="telefone" maxlength="20"></label><label class="span-2">E-mail de envio<input name="emailEnvio" maxlength="500"></label><label class="span-2">E-mail de nota fiscal<input name="emailNotaFiscal" maxlength="500"></label></div></fieldset>
+    <p id="edit-errors" class="form-message" role="alert"></p><footer class="dialog-actions"><button id="cancel-edit" class="button secondary" type="button">Cancelar</button><button id="save-edit" class="button primary" type="submit">Salvar e revalidar</button></footer>
+  </form></dialog>
+
+  <dialog id="duplicate-dialog" class="dialog"><div class="details-content"><header class="dialog-header"><div><p class="eyebrow">Duplicidade</p><h2>Escolha uma linha principal</h2></div><button id="close-duplicate" class="icon-button" type="button">×</button></header><p class="muted">Nenhuma linha é escolhida automaticamente. As demais serão ignoradas neste lote.</p><div id="duplicate-options" class="duplicate-grid"></div><footer class="dialog-actions"><button id="cancel-duplicate" class="button secondary" type="button">Cancelar</button><button id="resolve-duplicate" class="button primary" type="button" disabled>Usar linha selecionada</button></footer></div></dialog>
+
+  <dialog id="confirm-dialog" class="dialog confirm-dialog"><div class="details-content"><header class="dialog-header"><div><p class="eyebrow">Etapa 3</p><h2>Confirmar importação</h2></div><button id="close-confirm" class="icon-button" type="button">×</button></header><div id="confirm-summary"></div><p class="warning-box"><strong>Atenção:</strong> esta operação incluirá dados reais no banco. O servidor revalidará tudo e reverterá o lote inteiro se ocorrer uma falha.</p><footer class="dialog-actions"><button id="cancel-confirm" class="button secondary" type="button">Continuar revisando</button><button id="confirm-import" class="button primary" type="button">Importar 0 clientes</button></footer></div></dialog>
+  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+  <script type="module" src="/importacao.js"></script>
+</body>
+</html>

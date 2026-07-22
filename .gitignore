@@ -14,15 +14,22 @@ secrets/
 
 # Publicacao e logs locais
 publish/
+releases/
 logs/
 *.log
 
 # Dados reais nunca devem ser versionados
 *.xlsx
+*.xls
+*.csv
+*.bak
 dados-reais/*
 !dados-reais/.gitkeep
 !dados-reais/README.md
 importacao/originais/
+**/stage/*.json
+**/reports/*.csv
+**/temporary/
 
 # Arquivos temporarios do desenvolvimento assistido
 .codex-tmp/

@@ -13,6 +13,6 @@ internal static partial class ApplicationLog
     [LoggerMessage(EventId = 1002, Level = LogLevel.Information, Message = "Encerrando Lavanderia Anjos.")]
     public static partial void Stopping(ILogger logger);
 
-    [LoggerMessage(EventId = 1003, Level = LogLevel.Error, Message = "Erro não tratado. Tipo: {ExceptionType}.")]
-    public static partial void UnhandledException(ILogger logger, string exceptionType);
+    [LoggerMessage(EventId = 1003, Level = LogLevel.Error, Message = "Erro não tratado. Código: {ErrorCode}.")]
+    public static partial void UnhandledException(ILogger logger, Exception exception, string errorCode);
 }

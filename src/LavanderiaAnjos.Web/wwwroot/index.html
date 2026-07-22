@@ -3,59 +3,74 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lavanderia Anjos</title>
+  <title>Clientes | Lavanderia Anjos</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+  <header class="app-header">
+    <div class="header-inner">
+      <a class="brand" href="/clientes" aria-label="Lavanderia Anjos - Clientes"><span class="brand-mark" aria-hidden="true">LA</span><span><strong>Lavanderia Anjos</strong><small>Cadastro de clientes</small></span></a>
+      <nav aria-label="Navegação principal"><a href="/clientes" aria-current="page">Clientes</a><a href="/importacao">Importação</a><a href="/administradores">Administradores</a><span id="session-name" class="session-name"></span><button id="logout-button" class="button ghost" type="button">Sair</button></nav>
+    </div>
+  </header>
   <main class="shell">
-    <header class="topbar">
-      <div>
-        <p class="eyebrow">Sistema interno</p>
-        <h1>Lavanderia Anjos</h1>
-      </div>
-      <span class="environment">Base inicial</span>
-    </header>
-
-    <section class="hero panel">
-      <div>
-        <p class="eyebrow">Estrutura preparada</p>
-        <h2>Gestão simples, segura e disponível na rede local.</h2>
-        <p class="lead">
-          A infraestrutura do sistema está pronta. O cadastro e a importação de clientes
-          serão liberados depois da validação do modelo de dados.
-        </p>
-      </div>
-      <div class="health-card" aria-live="polite">
-        <span class="status-dot" id="status-dot"></span>
-        <div>
-          <strong id="health-title">Verificando serviços…</strong>
-          <p id="health-detail">Aplicação e banco de dados</p>
-        </div>
-        <button id="health-refresh" type="button">Verificar novamente</button>
-      </div>
+    <section class="page-heading"><div><p class="eyebrow">Cadastro</p><h1>Clientes</h1><p class="muted">Consulte, atualize e copie dados com rapidez.</p></div><div class="heading-actions"><a class="button secondary button-link" href="/importacao">Importar planilha</a><button id="new-client-button" class="button primary" type="button">Novo cliente</button></div></section>
+    <section class="panel filters" aria-label="Pesquisa e filtros">
+      <label class="search-field">Buscar<input id="search-input" type="search" placeholder="Nome, CPF/CNPJ, telefone, cidade ou código"></label>
+      <label>Tipo de pessoa<select id="type-filter"><option value="">Todos</option><option value="1">Pessoa física</option><option value="2">Pessoa jurídica</option></select></label>
+      <label>Cidade<input id="city-filter" type="search" placeholder="Todas"></label>
+      <label>Situação<select id="active-filter"><option value="true">Ativos</option><option value="false">Inativos</option><option value="todos">Todos</option></select></label>
+      <label>Ordenar por<select id="sort-filter"><option value="nome:asc">Nome A–Z</option><option value="nome:desc">Nome Z–A</option><option value="cidade:asc">Cidade</option><option value="criadoEm:desc">Mais recentes</option></select></label>
     </section>
-
-    <section class="grid" aria-label="Módulos planejados">
-      <article class="panel module-card">
-        <span class="module-number">01</span>
-        <h2>Clientes</h2>
-        <p>Entidade única para empresas e consumidores, sem categorias baseadas na planilha.</p>
-        <span class="badge">Próxima etapa</span>
-      </article>
-      <article class="panel module-card muted-card">
-        <span class="module-number">02</span>
-        <h2>Importação assistida</h2>
-        <p>Pré-visualização, normalização e alertas antes de qualquer gravação no banco.</p>
-        <span class="badge neutral">Planejado</span>
-      </article>
-      <article class="panel module-card muted-card">
-        <span class="module-number">03</span>
-        <h2>Atendimentos</h2>
-        <p>Histórico de serviços separado dos dados cadastrais do cliente.</p>
-        <span class="badge neutral">Planejado</span>
-      </article>
+    <section class="panel list-panel" aria-labelledby="list-title">
+      <div class="list-heading"><h2 id="list-title">Clientes cadastrados</h2><span id="result-count" class="muted"></span></div>
+      <div id="loading-state" class="status-state" aria-live="polite">Carregando clientes...</div>
+      <div id="error-state" class="status-state error-state" role="alert" hidden><span>Não foi possível carregar os clientes.</span><button id="retry-button" class="button secondary" type="button">Tentar novamente</button></div>
+      <div id="empty-state" class="status-state" hidden><strong>Nenhum cliente encontrado</strong><span>Ajuste os filtros ou cadastre um novo cliente.</span></div>
+      <div id="table-wrap" class="table-wrap" hidden><table><thead><tr><th>Nome ou razão social</th><th>CPF ou CNPJ</th><th>Tipo</th><th>Cidade</th><th>Telefone</th><th>Situação</th><th class="actions-column">Ações</th></tr></thead><tbody id="clients-body"></tbody></table></div>
+      <div id="pagination" class="pagination" hidden><button id="previous-page" class="button secondary" type="button">Anterior</button><span id="page-info" aria-live="polite"></span><button id="next-page" class="button secondary" type="button">Próxima</button></div>
     </section>
   </main>
-  <script src="/app.js" defer></script>
+  <dialog id="client-dialog" class="dialog form-dialog" aria-labelledby="form-title">
+    <form id="client-form" novalidate>
+      <header class="dialog-header"><div><p class="eyebrow">Cadastro de cliente</p><h2 id="form-title">Novo cliente</h2></div><button class="icon-button" id="close-form" type="button" aria-label="Fechar formulário">×</button></header>
+      <input type="hidden" name="id">
+      <fieldset><legend>Identificação</legend><div class="form-grid">
+        <label class="span-2">Nome ou razão social <span class="required">*</span><input name="nomeRazaoSocial" maxlength="200" required><small data-error-for="nomeRazaoSocial"></small></label>
+        <label>CPF ou CNPJ <span class="required">*</span><input name="documento" inputmode="numeric" maxlength="18" placeholder="000.000.000-00" required><small data-error-for="documento"></small></label>
+        <label>Tipo de pessoa<input name="tipoPessoaDisplay" readonly aria-describedby="type-help"><small id="type-help">Identificado automaticamente.</small></label>
+        <label>Código legado<input name="codigoLegado" type="number" min="0"><small data-error-for="codigoLegado"></small></label>
+        <label class="checkbox-label"><input name="produtorRural" type="checkbox"> Produtor rural</label>
+        <label>Inscrição estadual<input name="inscricaoEstadual" maxlength="30"><small data-error-for="inscricaoEstadual"></small></label>
+        <label>Inscrição municipal<input name="inscricaoMunicipal" maxlength="30"><small data-error-for="inscricaoMunicipal"></small></label>
+        <label>Início do relacionamento<input name="dataInicioRelacionamento" type="date"><small data-error-for="dataInicioRelacionamento"></small></label>
+      </div></fieldset>
+      <fieldset><legend>Endereço</legend><div class="form-grid">
+        <label>CEP<input name="cep" inputmode="numeric" maxlength="9" placeholder="00000-000"><small data-error-for="cep"></small></label>
+        <label class="span-2">Logradouro<input name="logradouro" maxlength="200"><small data-error-for="logradouro"></small></label>
+        <label>Número<input name="numero" maxlength="30"><small data-error-for="numero"></small></label>
+        <label>Complemento<input name="complemento" maxlength="150"><small data-error-for="complemento"></small></label>
+        <label>Bairro<input name="bairro" maxlength="100"><small data-error-for="bairro"></small></label>
+        <label>Cidade<input name="cidade" maxlength="100"><small data-error-for="cidade"></small></label>
+        <label>UF<input name="uf" maxlength="2" aria-label="Unidade federativa"><small data-error-for="uf"></small></label>
+      </div></fieldset>
+      <fieldset><legend>Contato</legend><div class="form-grid">
+        <label>Telefone<input name="telefone" type="tel" maxlength="20" placeholder="(14) 99999-9999"><small data-error-for="telefone"></small></label>
+        <label class="span-2">E-mail de envio ou contato<input name="emailEnvio" maxlength="500" placeholder="email@exemplo.com; outro@exemplo.com"><small data-error-for="emailEnvio"></small></label>
+        <label class="span-2">E-mail para nota fiscal<input name="emailNotaFiscal" maxlength="500"><small data-error-for="emailNotaFiscal"></small></label>
+      </div></fieldset>
+      <fieldset><legend>Informações adicionais</legend><label>Observações<textarea name="observacoes" maxlength="2000" rows="4"></textarea><small data-error-for="observacoes"></small></label></fieldset>
+      <p id="form-error" class="form-message" role="alert"></p>
+      <footer class="dialog-actions"><button id="cancel-form" class="button secondary" type="button">Cancelar</button><button id="save-client" class="button primary" type="submit">Salvar cliente</button></footer>
+    </form>
+  </dialog>
+  <dialog id="details-dialog" class="dialog details-dialog" aria-labelledby="details-title"><div class="details-content">
+    <header class="dialog-header"><div><p class="eyebrow">Dados completos</p><h2 id="details-title">Cliente</h2></div><button id="close-details" class="icon-button" type="button" aria-label="Fechar detalhes">×</button></header>
+    <div class="details-actions"><button id="copy-address" class="button secondary" type="button">Copiar endereço completo</button><button id="copy-all" class="button primary" type="button">Copiar todos os dados</button></div>
+    <div id="details-sections"></div>
+    <footer class="dialog-actions"><button id="edit-from-details" class="button secondary" type="button">Editar</button><button id="close-details-footer" class="button secondary" type="button">Fechar</button></footer>
+  </div></dialog>
+  <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
