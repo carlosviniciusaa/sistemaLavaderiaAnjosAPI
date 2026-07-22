@@ -39,6 +39,8 @@ New-Item -ItemType Directory -Path $appPath | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $operationsPath 'scripts') | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $operationsPath 'docs') | Out-Null
 New-Item -ItemType Directory -Path (Join-Path $operationsPath 'sql') | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $operationsPath 'tests\javascript') -Force | Out-Null
+New-Item -ItemType Directory -Path (Join-Path $operationsPath 'tests\browser') -Force | Out-Null
 
 $publishArguments = @(
     'publish', $project,
@@ -83,13 +85,20 @@ Copy-Item -Path (Join-Path $PSScriptRoot '*.ps1') -Destination (Join-Path $opera
 $documents = @(
     'implantacao-producao.md',
     'operacao-servidor.md',
-    'atualizacao-e-rollback.md'
+    'atualizacao-e-rollback.md',
+    'testes-copia-mobile.md'
 )
 foreach ($document in $documents) {
     Copy-Item -LiteralPath (Join-Path $repositoryRoot "docs\$document") -Destination (Join-Path $operationsPath 'docs')
 }
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'scripts\sql\LavanderiaAnjos-admin-management-idempotent.sql') `
     -Destination (Join-Path $operationsPath 'sql')
+Copy-Item -Path (Join-Path $repositoryRoot 'tests\javascript\clipboard*.test.mjs') `
+    -Destination (Join-Path $operationsPath 'tests\javascript')
+Copy-Item -Path (Join-Path $repositoryRoot 'tests\browser\*') `
+    -Destination (Join-Path $operationsPath 'tests\browser')
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tests\production\Test-PackagedCopyWiring.ps1') `
+    -Destination (Join-Path $operationsPath 'tests')
 
 $manifest = [ordered]@{
     releaseId = $ReleaseId
@@ -100,6 +109,9 @@ $manifest = [ordered]@{
     publishSingleFile = $false
     publishTrimmed = $false
     containsSecrets = $false
+    databaseChanges = $false
+    change = 'copy-modal-host-fix'
+    includedTests = 'operations/tests/Test-PackagedCopyWiring.ps1'
     requiredMigration = '20260721194510_GerenciamentoAdministradores'
     migrationScript = 'operations/sql/LavanderiaAnjos-admin-management-idempotent.sql'
     migrationExecutor = 'operations/scripts/Invoke-DatabaseMigration.ps1'
@@ -109,7 +121,15 @@ $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $packagePath 'r
 $compressed = $false
 for ($attempt = 1; $attempt -le 15 -and -not $compressed; $attempt++) {
     try {
-        Compress-Archive -LiteralPath $packagePath -DestinationPath $temporaryZipPath -CompressionLevel Optimal
+        $archiveParent = Split-Path -Parent $packagePath
+        $archiveDirectory = Split-Path -Leaf $packagePath
+        Push-Location $archiveParent
+        try {
+            & tar.exe -a -c -f $temporaryZipPath $archiveDirectory
+            if ($LASTEXITCODE -ne 0) { throw "tar.exe falhou com código $LASTEXITCODE." }
+        } finally {
+            Pop-Location
+        }
         Move-Item -LiteralPath $temporaryZipPath -Destination $zipPath
         $compressed = $true
     } catch {

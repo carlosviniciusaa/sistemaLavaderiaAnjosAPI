@@ -34,13 +34,14 @@ dotnet build .\LavanderiaAnjos.sln -c Release --no-restore
 dotnet test .\LavanderiaAnjos.sln -c Release --no-build
 node --test .\tests\javascript\*.test.mjs
 .\tests\sql\Test-AdminManagementMigration.ps1
-.\scripts\production\Publish-Production.ps1 -ReleaseId 20260722-admin-management-fix1
+.\scripts\production\Publish-Production.ps1 -ReleaseId 20260722-copy-modal-fix
 ```
 
 O processo cria, sem sobrescrever artefatos anteriores, a pasta, o ZIP e o arquivo
 `.zip.sha256` em `publish\production`. O pacote contém a aplicação autocontida, scripts
-operacionais, documentação e manifesto público. Não contém User Secrets, connection string,
-planilhas, relatórios reais, JSON de lotes, backups, testes ou código-fonte.
+operacionais, documentação, manifesto público e os testes JavaScript específicos de
+clipboard/wiring. Não contém User Secrets, connection string, planilhas, relatórios reais,
+JSON de lotes, backups, demais testes ou código-fonte da aplicação.
 
 Releases que exigem alteração aditiva de schema também incluem o SQL idempotente
 revisado em `operations\sql`. O script deve ser aplicado pelo procedimento de

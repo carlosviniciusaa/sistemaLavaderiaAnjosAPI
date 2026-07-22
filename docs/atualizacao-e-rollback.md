@@ -13,12 +13,16 @@
 
 ## Atualizar
 
-Gere e copie um novo pacote conforme `implantacao-producao.md`. Para a release
-`20260722-admin-management-fix1`, faça antes uma nova cópia de segurança com `CHECKSUM`
-e valide-a com `RESTORE VERIFYONLY`. Não remova nem sobrescreva backups anteriores.
+Gere e copie um novo pacote conforme `implantacao-producao.md`. A release
+`20260722-copy-modal-fix` altera somente arquivos estáticos do frontend e não possui
+alteração de banco. Não execute migration para aplicar esta correção. Confirme apenas
+que a migration preexistente `20260721194510_GerenciamentoAdministradores` continua
+registrada em `dbo.__EFMigrationsHistory`; preserve o banco e os backups existentes.
 
-No servidor, abra o PowerShell como administrador. Com autenticação integrada autorizada
-no SQL Server, aplique o script pela mesma conexão em todos os lotes:
+O pacote mantém o script idempotente da migration de administradores para preservar a
+capacidade de instalar o sistema completo em um ambiente novo. Ele não deve ser executado
+durante esta atualização de clipboard. Em uma instalação nova, use autenticação integrada
+autorizada no SQL Server e aplique-o pela mesma conexão em todos os lotes:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process RemoteSigned
@@ -48,18 +52,27 @@ lote. Ele serializa aplicações concorrentes, preserva usuários, hashes, clien
 importação e backups. As colunas e instruções dependentes são compiladas por `sp_executesql`.
 Uma colisão após `LOWER(LTRIM(RTRIM(Login)))` aborta antes de qualquer alteração de schema.
 
-Execute o mesmo comando uma segunda vez; ele deve concluir sem mudanças. Confirme que a linha
+Em uma instalação nova, execute o mesmo comando uma segunda vez; ele deve concluir sem mudanças. Confirme que a linha
 `20260721194510_GerenciamentoAdministradores` existe uma única vez em
 `dbo.__EFMigrationsHistory`. Somente então troque os binários.
 
 No servidor, abra PowerShell como administrador e execute exatamente:
+
+Antes da troca do serviço, valide os arquivos estáticos e o wiring incluído no pacote:
+
+```powershell
+cd <pacote>\operations\tests
+.\Test-PackagedCopyWiring.ps1 -PackagePath <pacote>
+```
+
+Depois execute a atualização:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process RemoteSigned
 cd <pacote>\operations\scripts
 .\Update-Service.ps1 `
     -PackagePath <pacote> `
-    -ReleaseId 20260722-admin-management-fix1 `
+    -ReleaseId 20260722-copy-modal-fix `
     -Root D:\LavanderiaAnjos\Sistema `
     -ServiceName LavanderiaAnjos
 ```

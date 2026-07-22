@@ -1,8 +1,10 @@
 [CmdletBinding()]
 param(
-    [string] $ReleaseId = '20260722-admin-management-fix1',
+    [string] $ReleaseId = '20260722-copy-modal-fix',
     [string] $ServerInstance = '(localdb)\MSSQLLocalDB',
-    [int] $Port = 5098
+    [int] $Port = 5098,
+    [ValidateSet('127.0.0.1', '0.0.0.0')][string] $BindAddress = '127.0.0.1',
+    [ValidateRange(0, 600)][int] $HoldSeconds = 0
 )
 
 Set-StrictMode -Version Latest
@@ -72,7 +74,7 @@ try {
     & $executorPath -SqlFile (Join-Path $repositoryRoot 'scripts\sql\LavanderiaAnjos-admin-management-idempotent.sql') -ServerInstance $ServerInstance -Database $database | Out-Null
 
     $env:ASPNETCORE_ENVIRONMENT = 'Production'
-    $env:ASPNETCORE_URLS = "http://127.0.0.1:$Port"
+    $env:ASPNETCORE_URLS = "http://${BindAddress}:$Port"
     $env:ConnectionStrings__LavanderiaAnjos = New-ConnectionString $database
     $env:BootstrapAdmin__Nome = 'Administrador de Validação'
     $env:BootstrapAdmin__Login = 'admin.validacao'
@@ -105,6 +107,11 @@ try {
     }
     if ($administratorsApi.StatusCode -ne 200 -or $administrators.Count -ne 1 -or $administrators[0].login -ne 'admin.validacao') {
         throw 'A API de administradores não retornou o administrador autenticado esperado.'
+    }
+
+    if ($HoldSeconds -gt 0) {
+        Write-Host "Validação interativa disponível por $HoldSeconds segundos em http://<ip-local>:$Port."
+        Start-Sleep -Seconds $HoldSeconds
     }
 
     [pscustomobject]@{

@@ -66,11 +66,19 @@
   </dialog>
   <dialog id="details-dialog" class="dialog details-dialog" aria-labelledby="details-title"><div class="details-content">
     <header class="dialog-header"><div><p class="eyebrow">Dados completos</p><h2 id="details-title">Cliente</h2></div><button id="close-details" class="icon-button" type="button" aria-label="Fechar detalhes">×</button></header>
-    <div class="details-actions"><button id="copy-address" class="button secondary" type="button">Copiar endereço completo</button><button id="copy-all" class="button primary" type="button">Copiar todos os dados</button></div>
+    <div class="details-actions"><button id="copy-address" class="button secondary" type="button" data-copy-action="address">Copiar endereço completo</button><button id="copy-all" class="button primary" type="button" data-copy-action="all">Copiar todos os dados</button></div>
     <div id="details-sections"></div>
     <footer class="dialog-actions"><button id="edit-from-details" class="button secondary" type="button">Editar</button><button id="close-details-footer" class="button secondary" type="button">Fechar</button></footer>
   </div></dialog>
+  <dialog id="manual-copy-dialog" class="dialog manual-copy-dialog" aria-labelledby="manual-copy-title">
+    <div class="manual-copy-content">
+      <header class="dialog-header"><div><p class="eyebrow">Cópia manual</p><h2 id="manual-copy-title">Selecione e copie o texto</h2></div><button id="close-manual-copy" class="icon-button" type="button" aria-label="Fechar cópia manual">×</button></header>
+      <p>Não foi possível copiar automaticamente. Toque e segure o texto selecionado e escolha <strong>Copiar</strong>.</p>
+      <textarea id="manual-copy-text" rows="8" readonly aria-label="Texto para copiar manualmente"></textarea>
+      <div class="dialog-actions manual-copy-actions"><button id="select-manual-copy" class="button primary" type="button">Selecionar texto</button></div>
+    </div>
+  </dialog>
   <div id="toast-stack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
-  <script type="module" src="/app.js"></script>
+  <script type="module" src="/app.js?v=20260722-copy-modal-fix"></script>
 </body>
 </html>

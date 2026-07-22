@@ -88,7 +88,7 @@ tbody tr.inactive td { color: var(--muted); background: #fafafa; }
 
 .dialog { width: min(940px, calc(100% - 24px)); max-height: calc(100vh - 28px); border: 1px solid var(--line); border-radius: 12px; padding: 0; color: var(--text); box-shadow: 0 24px 80px rgba(18, 40, 37, .25); }
 .dialog::backdrop { background: rgba(13, 31, 29, .52); backdrop-filter: blur(2px); }
-.dialog form, .details-content { display: grid; gap: 20px; padding: 22px; }
+.dialog form, .details-content, .manual-copy-content { display: grid; gap: 20px; padding: 22px; }
 .dialog-header, .dialog-actions, .details-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dialog-actions { position: sticky; bottom: 0; margin: 0 -22px -22px; padding: 16px 22px; border-top: 1px solid var(--line); background: var(--surface); }
 fieldset { min-width: 0; margin: 0; border: 1px solid var(--line); border-radius: 9px; padding: 16px; }
@@ -114,7 +114,11 @@ legend { padding: 0 8px; color: var(--primary-dark); font-size: 15px; font-weigh
 .detail-label { color: var(--muted); font-size: 12px; font-weight: 800; }
 .detail-value { overflow-wrap: anywhere; font-weight: 700; }
 .copy-button { min-height: 34px; padding: 5px 9px; }
-.copy-button.copied { border-color: var(--success); background: var(--success-soft); color: var(--success); }
+.copy-button.copied, .details-actions .copied { border-color: var(--success); background: var(--success-soft); color: var(--success); }
+.manual-copy-dialog { width: min(620px, calc(100% - 24px)); }
+.manual-copy-content > p { margin-bottom: 0; color: var(--muted); }
+.manual-copy-content textarea { min-height: 190px; resize: vertical; user-select: text; -webkit-user-select: text; }
+.manual-copy-actions { justify-content: flex-end; }
 
 .toast-stack { position: fixed; right: 18px; bottom: 18px; z-index: 100; display: grid; width: min(360px, calc(100% - 36px)); gap: 8px; }
 .toast { border: 1px solid var(--line); border-left: 4px solid var(--success); border-radius: 8px; padding: 12px 14px; background: var(--surface); box-shadow: var(--shadow); font-weight: 700; animation: slide-up 180ms ease both; }
@@ -177,7 +181,7 @@ legend { padding: 0 8px; color: var(--primary-dark); font-size: 15px; font-weigh
   .filters, .form-grid, .form-grid.two-columns, .detail-rows { grid-template-columns: 1fr; }
   .search-field, .span-2 { grid-column: auto; }
   .row-actions { justify-content: flex-start; }
-  .dialog form, .details-content { padding: 16px; }
+  .dialog form, .details-content, .manual-copy-content { padding: 16px; }
   .dialog-actions { margin: 0 -16px -16px; padding: 14px 16px; }
   .details-actions { align-items: stretch; flex-direction: column; }
   .details-actions .button { width: 100%; }

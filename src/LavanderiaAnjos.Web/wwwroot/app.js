@@ -1,23 +1,32 @@
-import { buildAllData, buildFullAddress, copyWithFeedback, hasValue } from "/clipboard.mjs";
+import { buildFullAddress, copyWithFeedback, hasValue, initializeOnceWhenDomReady, installCopyDelegation, resolveCopyRequest } from "/clipboard.mjs?v=20260722-copy-modal-fix";
 
 const state = { pagina: 1, tamanhoPagina: 20, totalPaginas: 0, currentClient: null, formSnapshot: "", loading: false };
-const elements = Object.fromEntries([
+const elementIds = [
   "session-name", "logout-button", "new-client-button", "search-input", "type-filter", "city-filter", "active-filter", "sort-filter",
   "loading-state", "error-state", "empty-state", "table-wrap", "clients-body", "result-count", "pagination", "previous-page",
   "next-page", "page-info", "retry-button", "client-dialog", "client-form", "form-title", "form-error", "close-form", "cancel-form",
   "save-client", "details-dialog", "details-title", "details-sections", "close-details", "close-details-footer", "edit-from-details",
-  "copy-address", "copy-all", "toast-stack"
-].map(id => [id.replaceAll("-", "_"), document.querySelector(`#${id}`)]));
+  "copy-address", "copy-all", "manual-copy-dialog", "manual-copy-text", "select-manual-copy", "close-manual-copy", "toast-stack"
+];
+let elements;
 
-initialize();
+initializeOnceWhenDomReady(document, "clientes-app", initialize, handleApplicationInitializationError);
 
 async function initialize() {
+  elements = collectElements();
   bindEvents();
   const response = await apiFetch("/api/auth/me");
   if (!response?.ok) return;
   const session = await response.json();
   elements.session_name.textContent = session.nome;
   await loadClients();
+}
+
+function collectElements() {
+  const entries = elementIds.map(id => [id.replace(/-/g, "_"), document.getElementById(id)]);
+  const missing = entries.filter(([, element]) => !element).map(([key]) => key);
+  if (missing.length) throw new Error(`Elementos obrigatórios ausentes: ${missing.join(", ")}`);
+  return Object.fromEntries(entries);
 }
 
 function bindEvents() {
@@ -35,8 +44,15 @@ function bindEvents() {
   elements.close_details.addEventListener("click", () => elements.details_dialog.close());
   elements.close_details_footer.addEventListener("click", () => elements.details_dialog.close());
   elements.edit_from_details.addEventListener("click", () => { const client = state.currentClient; elements.details_dialog.close(); openForm(client); });
-  elements.copy_address.addEventListener("click", () => copyConvenience("address"));
-  elements.copy_all.addEventListener("click", () => copyConvenience("all"));
+  try {
+    installCopyDelegation(document, handleCopyAction);
+    document.documentElement.dataset.copyWiring = "ready";
+  } catch (error) {
+    handleCopyInitializationError(error);
+  }
+  elements.select_manual_copy.addEventListener("click", selectManualCopyText);
+  elements.close_manual_copy.addEventListener("click", () => elements.manual_copy_dialog.close());
+  elements.manual_copy_dialog.addEventListener("cancel", event => { event.preventDefault(); elements.manual_copy_dialog.close(); });
   window.addEventListener("beforeunload", event => { if (isFormDirty()) { event.preventDefault(); event.returnValue = ""; } });
 
   let timer;
@@ -237,7 +253,7 @@ function renderDetails(client) {
   const sections = [
     ["Identificação", [["Nome ou razão social", client.nomeRazaoSocial], ["CPF ou CNPJ", formatDocument(client.documento)], ["Tipo de pessoa", formatPersonType(client.tipoPessoa)], ["Código legado", client.codigoLegado], ["Produtor rural", client.produtorRural ? "Sim" : "Não"], ["Início do relacionamento", formatDate(client.dataInicioRelacionamento)], ["Situação", client.ativo ? "Ativo" : "Inativo"]]],
     ["Inscrições", [["Inscrição estadual", client.inscricaoEstadual], ["Inscrição municipal", client.inscricaoMunicipal]]],
-    ["Endereço", [["CEP", formatCep(client.cep)], ["Logradouro", client.logradouro], ["Número", client.numero], ["Complemento", client.complemento], ["Bairro", client.bairro], ["Cidade", client.cidade], ["UF", client.uf]]],
+    ["Endereço", [["CEP", formatCep(client.cep)], ["Endereço", client.logradouro], ["Número", client.numero], ["Complemento", client.complemento], ["Bairro", client.bairro], ["Cidade", client.cidade], ["UF", client.uf]]],
     ["Contato", [["Telefone", formatPhone(client.telefone)], ["E-mail de contato", client.emailEnvio], ["E-mail de nota fiscal", client.emailNotaFiscal]]],
     ["Informações adicionais", [["Observações", client.observacoes]]]
   ];
@@ -257,29 +273,79 @@ function detailRow(label, value) {
   const labelElement = document.createElement("span"); labelElement.className = "detail-label"; labelElement.textContent = label;
   const valueElement = document.createElement("span"); valueElement.className = "detail-value"; valueElement.textContent = String(value).trim();
   const button = document.createElement("button"); button.type = "button"; button.className = "button secondary copy-button"; button.textContent = "Copiar";
+  button.dataset.copyAction = "value"; button.dataset.copyLabel = label;
   button.title = `Copiar ${label}`; button.setAttribute("aria-label", `Copiar ${label}`);
-  button.addEventListener("click", () => copyValue(valueElement.textContent, button, label));
   row.append(labelElement, valueElement, button); return row;
 }
 
-async function copyValue(value, button, label) {
+function handleCopyAction(button) {
   try {
-    const original = button.textContent; await copyWithFeedback(value, feedback => { button.textContent = feedback; }); button.classList.add("copied"); showToast(`${label} copiado.`);
-    setTimeout(() => { button.textContent = original; button.classList.remove("copied"); }, 1400);
-  } catch (error) { showToast(error.message || "Não foi possível copiar.", true); }
+    const request = resolveCopyRequest(button, state.currentClient, { formatCep, formatDocument, formatPersonType, formatDate, formatPhone });
+    return copyValue(request.text, button, request.label);
+  } catch (error) {
+    showToast("Não foi possível preparar o texto para cópia.", true);
+    logDevelopmentError("Falha ao resolver o texto do botão de copiar.", error);
+    return null;
+  }
 }
 
-async function copyConvenience(kind) {
-  const client = state.currentClient; if (!client) return;
-  const address = buildFullAddress(client, formatCep);
-  const formatted = { documento: formatDocument(client.documento), tipoPessoa: formatPersonType(client.tipoPessoa), dataInicioRelacionamento: formatDate(client.dataInicioRelacionamento), endereco: address, telefone: formatPhone(client.telefone) };
-  const value = kind === "address" ? address : buildAllData(client, formatted);
-  const button = kind === "address" ? elements.copy_address : elements.copy_all;
-  await copyValue(value, button, kind === "address" ? "Endereço completo" : "Dados do cliente");
+function copyValue(value, button, label) {
+  return copyWithFeedback(value, button, {
+    onSuccess: () => showCopySuccess(button, label),
+    onFailure: () => showToast("Não foi possível copiar automaticamente. Toque e segure o texto para copiar manualmente.", true),
+    onManualFallback: showManualCopy
+  }).catch(() => null);
+}
+
+function showCopySuccess(button, label) {
+  const original = button.dataset.copyOriginalText || button.textContent;
+  button.dataset.copyOriginalText = original;
+  const width = button.getBoundingClientRect?.().width;
+  if (width) button.style.minWidth = `${Math.ceil(width)}px`;
+  clearTimeout(button.copyFeedbackTimer);
+  button.textContent = "Copiado!";
+  button.classList.add("copied");
+  showToast(`${label} copiado.`);
+  button.copyFeedbackTimer = setTimeout(() => {
+    button.textContent = original;
+    button.classList.remove("copied");
+    button.style.minWidth = "";
+    delete button.dataset.copyOriginalText;
+  }, 1400);
+}
+
+function showManualCopy(text) {
+  elements.manual_copy_text.value = text;
+  if (!elements.manual_copy_dialog.open) elements.manual_copy_dialog.showModal();
+  selectManualCopyText();
+}
+
+function selectManualCopyText() {
+  const textarea = elements.manual_copy_text;
+  try { textarea.focus({ preventScroll: true }); } catch { textarea.focus(); }
+  textarea.select();
+  textarea.setSelectionRange?.(0, textarea.value.length);
 }
 
 function showToast(message, isError = false) {
   const toast = document.createElement("div"); toast.className = `toast${isError ? " error" : ""}`; toast.textContent = message; elements.toast_stack.appendChild(toast); setTimeout(() => toast.remove(), 3200);
+}
+
+function handleCopyInitializationError(error) {
+  showToast("Não foi possível ativar os botões de copiar. Atualize a página.", true);
+  logDevelopmentError("Falha ao inicializar os botões de copiar.", error);
+}
+
+function handleApplicationInitializationError(error) {
+  const stack = document.getElementById("toast-stack");
+  if (stack) {
+    const toast = document.createElement("div"); toast.className = "toast error"; toast.textContent = "Não foi possível iniciar a tela de clientes. Atualize a página."; stack.appendChild(toast);
+  }
+  logDevelopmentError("Falha ao inicializar a tela de clientes.", error);
+}
+
+function logDevelopmentError(message, error) {
+  if (["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)) console.error(message, error);
 }
 
 async function readError(response) {

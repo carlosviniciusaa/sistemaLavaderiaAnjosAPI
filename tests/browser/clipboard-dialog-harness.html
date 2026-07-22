@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Teste real de clipboard em dialog modal</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    dialog { min-width: min(38rem, 90vw); }
+    .detail-row { display: grid; grid-template-columns: 1fr auto; gap: .75rem; margin: .75rem 0; }
+    textarea { box-sizing: border-box; width: 100%; min-height: 7rem; }
+    output { display: block; white-space: pre-wrap; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <button id="open-details" type="button">Abrir cliente sintético</button>
+  <dialog id="details-dialog">
+    <h1>Cliente sintético</h1>
+    <div class="detail-row"><span class="detail-value">Cliente Modal Árvore</span><button type="button" data-copy-action="value" data-copy-text="Cliente Modal Árvore">Copiar nome</button></div>
+    <div class="detail-row"><span class="detail-value">529.982.247-25</span><button type="button" data-copy-action="value" data-copy-text="529.982.247-25">Copiar CPF/CNPJ</button></div>
+    <div class="detail-row"><span class="detail-value">(14) 99999-8888</span><button type="button" data-copy-action="value" data-copy-text="(14) 99999-8888">Copiar telefone</button></div>
+    <button type="button" data-copy-action="address" data-copy-text="Rua Modal, 10, Centro, Bastos/SP, CEP 17690-000">Copiar endereço completo</button>
+    <button type="button" data-copy-action="all" data-copy-text="Nome ou razão social: Cliente Modal Árvore&#10;CPF ou CNPJ: 529.982.247-25&#10;Telefone: (14) 99999-8888&#10;Endereço: Rua Modal, 10, Centro, Bastos/SP, CEP 17690-000">Copiar todos os dados</button>
+    <label for="paste-target">Campo para validar colagem</label>
+    <textarea id="paste-target"></textarea>
+    <button id="close-details" type="button">Fechar</button>
+    <output id="result"></output>
+  </dialog>
+
+  <script type="module">
+    const parameters = new URLSearchParams(location.search);
+    const modulePath = parameters.get("module") || "/src/LavanderiaAnjos.Web/wwwroot/clipboard.mjs";
+    const { copyText } = await import(modulePath);
+    const dialog = document.getElementById("details-dialog");
+    const result = document.getElementById("result");
+    const nativeAppendChild = Element.prototype.appendChild;
+
+    if (parameters.has("forceContentEditable")) {
+      const nativeExecCommand = document.execCommand.bind(document);
+      let copyCalls = 0;
+      document.execCommand = command => {
+        copyCalls += 1;
+        return copyCalls === 1 ? false : nativeExecCommand(command);
+      };
+    }
+
+    window.copyObservations = [];
+    document.addEventListener("copy", () => {
+      const active = document.activeElement;
+      const selectedText = typeof active?.selectionStart === "number"
+        ? active.value.slice(active.selectionStart, active.selectionEnd)
+        : document.getSelection()?.toString() || "";
+      document.documentElement.dataset.copyEvent = "received";
+      document.documentElement.dataset.copyEventText = selectedText;
+      document.documentElement.dataset.copyEventActiveHost = active?.parentElement?.id || active?.parentElement?.tagName?.toLowerCase() || "";
+    });
+    Element.prototype.appendChild = function appendChildWithObservation(node) {
+      if (node.matches?.("textarea[aria-hidden='true'], [contenteditable='true'][aria-hidden='true']")) {
+        document.documentElement.dataset.lastCopyHost = this.id || this.tagName.toLowerCase();
+        document.documentElement.dataset.lastCopyElement = node.tagName;
+        window.copyObservations.push({
+          hostId: this.id || this.tagName.toLowerCase(),
+          tagName: node.tagName,
+          dialogOpen: dialog.open,
+          modal: (() => { try { return dialog.matches(":modal"); } catch { return null; } })()
+        });
+      }
+      return nativeAppendChild.call(this, node);
+    };
+
+    document.getElementById("open-details").addEventListener("click", () => dialog.showModal());
+    document.getElementById("close-details").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", event => {
+      const button = event.target.closest("button[data-copy-action]");
+      if (!button) return;
+      const text = button.dataset.copyText;
+      window.lastCopyPromise = copyText(text, button).then(
+        method => {
+          window.lastCopy = { method, text, error: null };
+          document.documentElement.dataset.lastCopyMethod = method;
+          document.documentElement.dataset.lastCopyText = text;
+          result.textContent = `${method}: ${text}`;
+          return window.lastCopy;
+        },
+        error => {
+          window.lastCopy = { method: null, text, error: error.message };
+          document.documentElement.dataset.lastCopyMethod = "failure";
+          result.textContent = `falha: ${error.message}`;
+          throw error;
+        }
+      );
+    });
+  </script>
+</body>
+</html>
