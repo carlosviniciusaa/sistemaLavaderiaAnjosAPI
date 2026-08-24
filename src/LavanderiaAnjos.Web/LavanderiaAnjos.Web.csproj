@@ -2,6 +2,7 @@
   <PropertyGroup>
     <UserSecretsId>LavanderiaAnjos-Development-8f5b6f44-9181-4e8d-b902-a8d6af9ad249</UserSecretsId>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <ApplicationIcon>wwwroot\assets\brand\favicon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">

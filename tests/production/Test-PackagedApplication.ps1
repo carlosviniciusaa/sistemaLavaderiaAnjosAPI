@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [string] $ReleaseId = '20260722-copy-modal-fix',
+    [string] $ReleaseId = '20260824-brand-icons',
     [string] $ServerInstance = '(localdb)\MSSQLLocalDB',
     [int] $Port = 5098,
     [ValidateSet('127.0.0.1', '0.0.0.0')][string] $BindAddress = '127.0.0.1',

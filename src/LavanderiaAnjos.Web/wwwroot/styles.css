@@ -35,7 +35,7 @@ h3 { margin: 0; font-size: 16px; }
 .brand { display: flex; align-items: center; gap: 11px; color: var(--text); text-decoration: none; }
 .brand strong, .brand small { display: block; }
 .brand small { color: var(--muted); font-size: 12px; }
-.brand-mark { display: grid; width: 42px; height: 42px; flex: 0 0 auto; place-items: center; border-radius: 12px; background: var(--primary); color: #fff; font-size: 13px; font-weight: 900; letter-spacing: .05em; }
+.brand-logo { display: block; width: 44px; height: 44px; flex: 0 0 auto; object-fit: contain; }
 nav { display: flex; align-items: center; gap: 12px; }
 nav a { padding: 8px; color: var(--primary-dark); font-weight: 700; text-decoration: none; }
 .session-name { color: var(--muted); font-size: 13px; }
@@ -127,6 +127,7 @@ legend { padding: 0 8px; color: var(--primary-dark); font-size: 15px; font-weigh
 .auth-page { min-height: 100vh; background: radial-gradient(circle at 15% 10%, rgba(34, 108, 103, .15), transparent 34rem), var(--page); }
 .auth-shell { display: grid; min-height: 100vh; padding: 24px; place-items: center; }
 .auth-card { display: grid; width: min(430px, 100%); gap: 20px; border: 1px solid var(--line); border-radius: 14px; padding: 30px; background: var(--surface); box-shadow: var(--shadow); }
+.login-logo { display: block; width: clamp(88px, 24vw, 104px); height: clamp(88px, 24vw, 104px); margin: 0 auto; object-fit: contain; }
 .auth-card form { display: grid; gap: 10px; }
 
 .import-shell { display: grid; gap: 18px; }
@@ -174,6 +175,7 @@ legend { padding: 0 8px; color: var(--primary-dark); font-size: 15px; font-weigh
 @media (max-width: 680px) {
   .header-inner, .shell { width: calc(100% - 20px); }
   .header-inner { padding: 10px 0; align-items: flex-start; }
+  .brand-logo { width: 40px; height: 40px; }
   nav { align-items: flex-end; flex-direction: column; gap: 2px; }
   nav a, .session-name { display: none; }
   .page-heading { align-items: stretch; flex-direction: column; }

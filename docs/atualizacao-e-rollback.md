@@ -14,54 +14,18 @@
 ## Atualizar
 
 Gere e copie um novo pacote conforme `implantacao-producao.md`. A release
-`20260722-copy-modal-fix` altera somente arquivos estáticos do frontend e não possui
-alteração de banco. Não execute migration para aplicar esta correção. Confirme apenas
-que a migration preexistente `20260721194510_GerenciamentoAdministradores` continua
-registrada em `dbo.__EFMigrationsHistory`; preserve o banco e os backups existentes.
-
-O pacote mantém o script idempotente da migration de administradores para preservar a
-capacidade de instalar o sistema completo em um ambiente novo. Ele não deve ser executado
-durante esta atualização de clipboard. Em uma instalação nova, use autenticação integrada
-autorizada no SQL Server e aplique-o pela mesma conexão em todos os lotes:
-
-```powershell
-Set-ExecutionPolicy -Scope Process RemoteSigned
-cd <pacote>\operations\scripts
-.\Invoke-DatabaseMigration.ps1 `
-    -SqlFile ..\sql\LavanderiaAnjos-admin-management-idempotent.sql `
-    -ServerInstance '.\SQLEXPRESS' `
-    -Database LavanderiaAnjos
-```
-
-Se a administração do banco usa login SQL, obtenha a credencial sem gravá-la em arquivo ou
-linha de comando e acrescente `-SqlCredential $sqlCredential`:
-
-```powershell
-$sqlCredential = Get-Credential -Message 'Credencial administrativa do SQL Server'
-```
-
-O executor usa `System.Data.SqlClient`, não depende de SSMS nem de `sqlcmd`, lê UTF-8 e divide
-os lotes exatamente por:
-
-```powershell
-[regex]::Split($sql, '(?im)^\s*GO\s*(?:--.*)?$')
-```
-
-O script mantém `BEGIN TRANSACTION`, `XACT_ABORT`, `TRY/CATCH` e rollback explícito no mesmo
-lote. Ele serializa aplicações concorrentes, preserva usuários, hashes, clientes, histórico de
-importação e backups. As colunas e instruções dependentes são compiladas por `sp_executesql`.
-Uma colisão após `LOWER(LTRIM(RTRIM(Login)))` aborta antes de qualquer alteração de schema.
-
-Em uma instalação nova, execute o mesmo comando uma segunda vez; ele deve concluir sem mudanças. Confirme que a linha
-`20260721194510_GerenciamentoAdministradores` existe uma única vez em
-`dbo.__EFMigrationsHistory`. Somente então troque os binários.
+`20260824-brand-icons` altera a identidade visual e o ícone do executável, sem alteração
+de banco. O pacote não contém SQL de migration e o manifesto define
+`requiredMigration = null`. Não execute migration para aplicar esta atualização; preserve
+integralmente o banco, o histórico de migrations e os backups existentes.
 
 No servidor, abra PowerShell como administrador e execute exatamente:
 
-Antes da troca do serviço, valide os arquivos estáticos e o wiring incluído no pacote:
+Antes da troca do serviço, valide os arquivos de identidade e o wiring incluídos no pacote:
 
 ```powershell
 cd <pacote>\operations\tests
+.\Test-PackagedBranding.ps1 -PackagePath <pacote>
 .\Test-PackagedCopyWiring.ps1 -PackagePath <pacote>
 ```
 
@@ -72,7 +36,7 @@ Set-ExecutionPolicy -Scope Process RemoteSigned
 cd <pacote>\operations\scripts
 .\Update-Service.ps1 `
     -PackagePath <pacote> `
-    -ReleaseId 20260722-copy-modal-fix `
+    -ReleaseId 20260824-brand-icons `
     -Root D:\LavanderiaAnjos\Sistema `
     -ServiceName LavanderiaAnjos
 ```

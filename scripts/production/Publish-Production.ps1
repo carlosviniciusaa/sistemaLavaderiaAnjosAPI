@@ -86,18 +86,21 @@ $documents = @(
     'implantacao-producao.md',
     'operacao-servidor.md',
     'atualizacao-e-rollback.md',
-    'testes-copia-mobile.md'
+    'testes-copia-mobile.md',
+    'identidade-visual.md'
 )
 foreach ($document in $documents) {
     Copy-Item -LiteralPath (Join-Path $repositoryRoot "docs\$document") -Destination (Join-Path $operationsPath 'docs')
 }
-Copy-Item -LiteralPath (Join-Path $repositoryRoot 'scripts\sql\LavanderiaAnjos-admin-management-idempotent.sql') `
-    -Destination (Join-Path $operationsPath 'sql')
 Copy-Item -Path (Join-Path $repositoryRoot 'tests\javascript\clipboard*.test.mjs') `
+    -Destination (Join-Path $operationsPath 'tests\javascript')
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tests\javascript\branding.test.mjs') `
     -Destination (Join-Path $operationsPath 'tests\javascript')
 Copy-Item -Path (Join-Path $repositoryRoot 'tests\browser\*') `
     -Destination (Join-Path $operationsPath 'tests\browser')
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tests\production\Test-PackagedCopyWiring.ps1') `
+    -Destination (Join-Path $operationsPath 'tests')
+Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tests\production\Test-PackagedBranding.ps1') `
     -Destination (Join-Path $operationsPath 'tests')
 
 $manifest = [ordered]@{
@@ -110,11 +113,12 @@ $manifest = [ordered]@{
     publishTrimmed = $false
     containsSecrets = $false
     databaseChanges = $false
-    change = 'copy-modal-host-fix'
-    includedTests = 'operations/tests/Test-PackagedCopyWiring.ps1'
-    requiredMigration = '20260721194510_GerenciamentoAdministradores'
-    migrationScript = 'operations/sql/LavanderiaAnjos-admin-management-idempotent.sql'
-    migrationExecutor = 'operations/scripts/Invoke-DatabaseMigration.ps1'
+    change = 'brand-icons'
+    includedTests = @(
+        'operations/tests/Test-PackagedBranding.ps1',
+        'operations/tests/Test-PackagedCopyWiring.ps1'
+    )
+    requiredMigration = $null
 }
 $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $packagePath 'release-manifest.json') -Encoding UTF8
 

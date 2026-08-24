@@ -34,7 +34,7 @@ dotnet build .\LavanderiaAnjos.sln -c Release --no-restore
 dotnet test .\LavanderiaAnjos.sln -c Release --no-build
 node --test .\tests\javascript\*.test.mjs
 .\tests\sql\Test-AdminManagementMigration.ps1
-.\scripts\production\Publish-Production.ps1 -ReleaseId 20260722-copy-modal-fix
+.\scripts\production\Publish-Production.ps1 -ReleaseId 20260824-brand-icons
 ```
 
 O processo cria, sem sobrescrever artefatos anteriores, a pasta, o ZIP e o arquivo
