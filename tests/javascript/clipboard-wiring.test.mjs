@@ -46,7 +46,7 @@ const formatters = {
 
 test("1. /clientes serve index.html e o entrypoint module importa clipboard.mjs versionado", () => {
   if (programSource) assert.match(programSource, /app\.MapGet\("\/clientes"[\s\S]*?"index\.html"/);
-  assert.match(indexSource, /<script type="module" src="\/app\.js\?v=20260722-copy-modal-fix"><\/script>/);
+  assert.match(indexSource, /<script type="module" src="\/app\.js\?v=20261117-ui-polish"><\/script>/);
   assert.match(appSource, /from "\/clipboard\.mjs\?v=20260722-copy-modal-fix"/);
 });
 

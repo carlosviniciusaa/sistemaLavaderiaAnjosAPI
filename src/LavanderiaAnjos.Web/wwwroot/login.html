@@ -3,24 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#226c67">
+  <meta name="theme-color" content="#1763ae">
   <title>Entrar | Lavanderia Anjos</title>
   <link rel="icon" type="image/svg+xml" href="/assets/brand/lavanderia-anjos-color.svg?v=20260824-brand-icons">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/lavanderia-anjos-32.png?v=20260824-brand-icons">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/lavanderia-anjos-16.png?v=20260824-brand-icons">
   <link rel="alternate icon" href="/assets/brand/favicon.ico?v=20260824-brand-icons">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/apple-touch-icon.png?v=20260824-brand-icons">
-  <link rel="mask-icon" href="/assets/brand/lavanderia-anjos-monochrome.svg?v=20260824-brand-icons" color="#226c67">
+  <link rel="mask-icon" href="/assets/brand/lavanderia-anjos-monochrome.svg?v=20260824-brand-icons" color="#1763ae">
   <link rel="manifest" href="/site.webmanifest?v=20260824-brand-icons">
-  <link rel="stylesheet" href="/styles.css?v=20260824-brand-icons">
+  <link rel="stylesheet" href="/styles.css?v=20261117-ui-polish">
+  <link rel="stylesheet" href="/split-text.css?v=20261117-ui-polish">
 </head>
 <body class="auth-page">
-  <main class="auth-shell">
+  <main id="main-content" tabindex="-1" class="auth-shell">
+    <aside class="auth-intro" aria-label="Sobre o sistema">
+      <div class="auth-brand"><img src="/assets/brand/lavanderia-anjos-color.svg?v=20260824-brand-icons" width="48" height="48" alt="" aria-hidden="true"><span>Lavanderia Anjos</span></div>
+      <div><p class="auth-headline">O cadastro em dia.<br>O atendimento mais ágil.</p><p>Consulte clientes, atualize informações e tenha os dados à mão para cada atendimento.</p></div>
+      <p class="auth-note">Sistema interno · Gestão de clientes</p>
+    </aside>
     <section class="auth-card" aria-labelledby="login-title">
       <img class="login-logo" src="/assets/brand/lavanderia-anjos-color.svg?v=20260824-brand-icons" width="104" height="104" alt="" aria-hidden="true">
       <div>
         <p class="eyebrow">Sistema interno</p>
-        <h1 id="login-title">Lavanderia Anjos</h1>
+        <h1 id="login-title" data-split-text="chars">Lavanderia Anjos</h1>
         <p class="muted">Acesse o cadastro de clientes.</p>
       </div>
       <form id="login-form" novalidate>
@@ -31,8 +37,10 @@
         <p id="login-error" class="field-message form-message" role="alert"></p>
         <button class="button primary wide" type="submit">Entrar</button>
       </form>
+      <p class="auth-footer">Acesso exclusivo para administradores.</p>
     </section>
   </main>
   <script src="/login.js" defer></script>
+  <script type="module" src="/split-text.mjs?v=20261117-ui-polish"></script>
 </body>
 </html>

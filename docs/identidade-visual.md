@@ -22,8 +22,11 @@ somente de identidade e instalação na tela inicial; nenhum service worker foi 
 
 ## Cache e acessibilidade
 
-Os novos assets e `styles.css` usam a versão `20260824-brand-icons`. As versões existentes
-de `app.js` e `clipboard.mjs` permanecem inalteradas. Nos cabeçalhos e no login, o nome
+Os assets de marca usam a versão `20260824-brand-icons`; `styles.css`,
+`split-text.css` e `split-text.mjs` usam `20261117-ui-polish`. A interface usa azul
+`#1763ae`, com superfícies neutras e estados semânticos de sucesso e erro. Os entrypoints
+`app.js`, `importacao.js` e `administradores.js` também usam `20261117-ui-polish`;
+a versão de `clipboard.mjs` permanece `20260722-copy-modal-fix`. Nos cabeçalhos e no login, o nome
 Lavanderia Anjos já está visível, portanto as imagens são decorativas (`alt=""` e
 `aria-hidden="true"`) para não duplicar a leitura por tecnologia assistiva.
 

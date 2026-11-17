@@ -61,7 +61,7 @@ test("todas as páginas reais usam logo, favicons, touch icon, mask icon e manif
     assert.match(html, /rel="apple-touch-icon" sizes="180x180"/);
     assert.match(html, /rel="mask-icon"[^>]+lavanderia-anjos-monochrome\.svg\?v=20260824-brand-icons/);
     assert.match(html, /rel="manifest" href="\/site\.webmanifest\?v=20260824-brand-icons"/);
-    assert.match(html, /styles\.css\?v=20260824-brand-icons/);
+    assert.match(html, /styles\.css\?v=20261117-ui-polish/);
     assert.doesNotMatch(html, /brand-mark|>LA<|src="[A-Z]:\\/i);
   }
 });
@@ -73,7 +73,7 @@ test("logo do cabeçalho é decorativo e o login usa versão maior sem leitura d
   }
   const login = await source("login.html");
   assert.match(login, /class="login-logo"[^>]+width="104" height="104" alt="" aria-hidden="true"/);
-  assert.match(login, /<h1 id="login-title">Lavanderia Anjos<\/h1>/);
+  assert.match(login, /<h1 id="login-title" data-split-text="chars">Lavanderia Anjos<\/h1>/);
 });
 
 test("CSS preserva proporção e adapta logos ao viewport móvel", async () => {

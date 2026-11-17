@@ -33,15 +33,17 @@ dotnet restore .\LavanderiaAnjos.sln
 dotnet build .\LavanderiaAnjos.sln -c Release --no-restore
 dotnet test .\LavanderiaAnjos.sln -c Release --no-build
 node --test .\tests\javascript\*.test.mjs
-.\tests\sql\Test-AdminManagementMigration.ps1
-.\scripts\production\Publish-Production.ps1 -ReleaseId 20260824-brand-icons
+# Esta release não executa testes que criam bancos SQL nem aplica migrations.
+.\scripts\production\Publish-Production.ps1 -ReleaseId 20261117-visual-polish
 ```
 
 O processo cria, sem sobrescrever artefatos anteriores, a pasta, o ZIP e o arquivo
 `.zip.sha256` em `publish\production`. O pacote contém a aplicação autocontida, scripts
 operacionais, documentação, manifesto público e os testes JavaScript específicos de
 clipboard/wiring. Não contém User Secrets, connection string, planilhas, relatórios reais,
-JSON de lotes, backups, demais testes ou código-fonte da aplicação.
+JSON de lotes, backups ou código-fonte da aplicação. Os testes operacionais de
+identidade, clipboard, segurança e navegador são incluídos separadamente em operations.
+Consulte [o procedimento desta release](release-20261117-visual-polish.md).
 
 Releases que exigem alteração aditiva de schema também incluem o SQL idempotente
 revisado em `operations\sql`. O script deve ser aplicado pelo procedimento de

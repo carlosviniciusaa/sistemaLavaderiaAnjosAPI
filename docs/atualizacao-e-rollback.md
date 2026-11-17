@@ -14,7 +14,7 @@
 ## Atualizar
 
 Gere e copie um novo pacote conforme `implantacao-producao.md`. A release
-`20260824-brand-icons` altera a identidade visual e o ícone do executável, sem alteração
+`20261117-visual-polish` refina as quatro telas e suas animações, sem alteração
 de banco. O pacote não contém SQL de migration e o manifesto define
 `requiredMigration = null`. Não execute migration para aplicar esta atualização; preserve
 integralmente o banco, o histórico de migrations e os backups existentes.
@@ -36,7 +36,7 @@ Set-ExecutionPolicy -Scope Process RemoteSigned
 cd <pacote>\operations\scripts
 .\Update-Service.ps1 `
     -PackagePath <pacote> `
-    -ReleaseId 20260824-brand-icons `
+    -ReleaseId 20261117-visual-polish `
     -Root D:\LavanderiaAnjos\Sistema `
     -ServiceName LavanderiaAnjos
 ```
@@ -58,6 +58,9 @@ D:\LavanderiaAnjos\Sistema\scripts\Rollback-Service.ps1 -TargetReleaseId <releas
 ```
 
 O rollback troca somente binários. Se uma versão exigiu migration, revise manualmente a compatibilidade; os scripts nunca revertem schema ou dados.
+
+O procedimento específico de [20261117-visual-polish](release-20261117-visual-polish.md)
+inclui conferência SHA-256, inventário, registro do ID anterior e as validações locais.
 
 ## Diagnóstico
 

@@ -315,7 +315,7 @@ function setListState(stateName) {
 
 function showToast(message, isError = false) {
   const toast = document.createElement("div");
-  toast.className = `toast${isError ? " error" : ""}`;
+  toast.className = `toast t-toast is-open${isError ? " error" : ""}`;
   toast.textContent = message;
   elements.toast_stack.append(toast);
   setTimeout(() => toast.remove(), 3500);

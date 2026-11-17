@@ -279,4 +279,4 @@ function personType(value) { return value === 1 || value === "PessoaFisica" ? "P
 function statusClass(status) { if (status.includes("Inválido") || status.includes("Duplicado")) return "danger"; if (status.includes("alerta") || status.includes("inativo")) return "warning"; return "success"; }
 function lotStatus(value) { return ({ 1: "Pré-visualização", 2: "Concluída", 3: "Cancelada", 4: "Expirada", 5: "Falhou" })[value] || value; }
 async function errorMessage(response) { if (!response) return "Não foi possível conectar ao sistema."; return formatApiError(await response.json().catch(() => null)); }
-function showToast(message, error = false) { const toast = document.createElement("div"); toast.className = `toast${error ? " error" : ""}`; toast.textContent = message; elements.toast_stack.appendChild(toast); setTimeout(() => toast.remove(), 4200); }
+function showToast(message, error = false) { const toast = document.createElement("div"); toast.className = `toast t-toast is-open${error ? " error" : ""}`; toast.textContent = message; elements.toast_stack.appendChild(toast); setTimeout(() => toast.remove(), 4200); }

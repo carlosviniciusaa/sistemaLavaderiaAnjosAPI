@@ -3,35 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#226c67">
+  <meta name="theme-color" content="#1763ae">
   <title>Administradores | Lavanderia Anjos</title>
   <link rel="icon" type="image/svg+xml" href="/assets/brand/lavanderia-anjos-color.svg?v=20260824-brand-icons">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/lavanderia-anjos-32.png?v=20260824-brand-icons">
   <link rel="icon" type="image/png" sizes="16x16" href="/assets/brand/lavanderia-anjos-16.png?v=20260824-brand-icons">
   <link rel="alternate icon" href="/assets/brand/favicon.ico?v=20260824-brand-icons">
   <link rel="apple-touch-icon" sizes="180x180" href="/assets/brand/apple-touch-icon.png?v=20260824-brand-icons">
-  <link rel="mask-icon" href="/assets/brand/lavanderia-anjos-monochrome.svg?v=20260824-brand-icons" color="#226c67">
+  <link rel="mask-icon" href="/assets/brand/lavanderia-anjos-monochrome.svg?v=20260824-brand-icons" color="#1763ae">
   <link rel="manifest" href="/site.webmanifest?v=20260824-brand-icons">
-  <link rel="stylesheet" href="/styles.css?v=20260824-brand-icons">
+  <link rel="stylesheet" href="/styles.css?v=20261117-ui-polish">
+  <link rel="stylesheet" href="/split-text.css?v=20261117-ui-polish">
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Ir para o conteúdo</a>
   <header class="app-header"><div class="header-inner">
     <a class="brand" href="/clientes" aria-label="Lavanderia Anjos"><img class="brand-logo" src="/assets/brand/lavanderia-anjos-color.svg?v=20260824-brand-icons" width="44" height="44" alt="" aria-hidden="true"><span><strong>Lavanderia Anjos</strong><small>Gestão do sistema</small></span></a>
-    <nav aria-label="Navegação principal"><a href="/clientes">Clientes</a><a href="/importacao">Importação</a><a href="/administradores" aria-current="page">Administradores</a><span id="session-name" class="session-name"></span><button id="logout-button" class="button ghost" type="button">Sair</button></nav>
+    <nav aria-label="Navegação principal"><a href="/clientes"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 5a3 3 0 0 1 0 6M21 21v-3a6 6 0 0 0-3-5"/></svg><span>Clientes</span></a><a href="/importacao"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M12 18v-6m-3 3 3-3 3 3"/></svg><span>Importação</span></a><a href="/administradores" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4v5c0 5-8 9-8 9s-8-4-8-9V7z"/><path d="m9 12 2 2 4-4"/></svg><span>Administradores</span></a><span id="session-name" class="session-name"></span><button id="logout-button" class="button ghost" type="button">Sair</button></nav>
   </div></header>
 
-  <main class="shell">
-    <section class="page-heading"><div><p class="eyebrow">Acesso ao sistema</p><h1>Administradores</h1><p class="muted">Crie e gerencie quem pode acessar o sistema.</p></div><button id="new-admin-button" class="button primary" type="button">Novo administrador</button></section>
+  <main id="main-content" tabindex="-1" class="shell">
+    <section class="page-heading"><div><p class="eyebrow">Acesso ao sistema</p><h1 data-split-text="chars">Administradores</h1><p class="muted">Crie e gerencie quem pode acessar o sistema.</p></div><button id="new-admin-button" class="button primary" type="button">Novo administrador</button></section>
     <section class="panel list-panel" aria-labelledby="admin-list-title">
       <div class="list-heading"><h2 id="admin-list-title">Administradores cadastrados</h2><span id="admin-count" class="muted"></span></div>
       <div id="admin-loading" class="status-state" aria-live="polite">Carregando administradores...</div>
       <div id="admin-error" class="status-state error-state" role="alert" hidden><span>Não foi possível carregar os administradores.</span><button id="admin-retry" class="button secondary" type="button">Tentar novamente</button></div>
       <div id="admin-empty" class="status-state" hidden>Nenhum administrador cadastrado.</div>
-      <div id="admin-table-wrap" class="table-wrap" hidden><table class="admin-table"><thead><tr><th>Nome</th><th>Login</th><th>Situação</th><th>Data de criação</th><th>Última alteração</th><th class="actions-column">Ações</th></tr></thead><tbody id="admin-body"></tbody></table></div>
+      <div id="admin-table-wrap" class="table-wrap" tabindex="0" role="region" aria-label="Tabela de registros, role horizontalmente para ver todas as colunas" hidden><table class="admin-table"><thead><tr><th>Nome</th><th>Login</th><th>Situação</th><th>Data de criação</th><th>Última alteração</th><th class="actions-column">Ações</th></tr></thead><tbody id="admin-body"></tbody></table></div>
     </section>
   </main>
 
-  <dialog id="admin-dialog" class="dialog compact-dialog" aria-labelledby="admin-form-title"><form id="admin-form" novalidate>
+  <dialog id="admin-dialog" class="dialog t-modal is-open compact-dialog" aria-labelledby="admin-form-title"><form id="admin-form" novalidate>
     <header class="dialog-header"><div><p class="eyebrow">Administrador</p><h2 id="admin-form-title">Novo administrador</h2></div><button id="close-admin-form" class="icon-button" type="button" aria-label="Fechar">×</button></header>
     <input name="id" type="hidden"><input name="versao" type="hidden">
     <div class="form-grid two-columns"><label>Nome <span class="required">*</span><input name="nome" maxlength="150" autocomplete="name" required><small data-error-for="nome"></small></label><label>Login <span class="required">*</span><input name="login" minlength="3" maxlength="100" pattern="[A-Za-z0-9._-]+" autocomplete="username" required><small data-error-for="login"></small></label></div>
@@ -39,20 +41,21 @@
     <p id="admin-form-error" class="form-message" role="alert"></p><footer class="dialog-actions"><button id="cancel-admin-form" class="button secondary" type="button">Cancelar</button><button id="save-admin" class="button primary" type="submit">Salvar administrador</button></footer>
   </form></dialog>
 
-  <dialog id="password-dialog" class="dialog compact-dialog" aria-labelledby="password-title"><form id="password-form" novalidate>
+  <dialog id="password-dialog" class="dialog t-modal is-open compact-dialog" aria-labelledby="password-title"><form id="password-form" novalidate>
     <header class="dialog-header"><div><p class="eyebrow">Segurança</p><h2 id="password-title">Redefinir senha</h2><p id="password-admin-name" class="muted"></p></div><button id="close-password-form" class="icon-button" type="button" aria-label="Fechar">×</button></header>
     <input name="id" type="hidden"><input name="versao" type="hidden">
     <div class="form-grid two-columns"><label>Nova senha <span class="required">*</span><span class="password-field"><input name="novaSenha" type="password" minlength="8" maxlength="256" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="novaSenha" aria-label="Mostrar nova senha">Mostrar</button></span><small data-error-for="novaSenha"></small></label><label>Confirmar senha <span class="required">*</span><span class="password-field"><input name="confirmacaoSenha" type="password" minlength="8" maxlength="256" autocomplete="new-password" required><button class="password-toggle" type="button" data-toggle-password="confirmacaoSenha" aria-label="Mostrar confirmação de senha">Mostrar</button></span><small data-error-for="confirmacaoSenha"></small></label></div>
     <p class="muted">A nova senha deve ter ao menos 8 caracteres, uma letra e um número. Sessões existentes desse usuário serão encerradas.</p><p id="password-form-error" class="form-message" role="alert"></p><footer class="dialog-actions"><button id="cancel-password-form" class="button secondary" type="button">Cancelar</button><button id="save-password" class="button primary" type="submit">Redefinir senha</button></footer>
   </form></dialog>
 
-  <dialog id="status-dialog" class="dialog compact-dialog" aria-labelledby="status-title"><div class="details-content">
+  <dialog id="status-dialog" class="dialog t-modal is-open compact-dialog" aria-labelledby="status-title"><div class="details-content">
     <header class="dialog-header"><div><p class="eyebrow">Confirmação</p><h2 id="status-title">Inativar administrador</h2></div><button id="close-status-dialog" class="icon-button" type="button" aria-label="Fechar">×</button></header>
     <p id="status-message">Confirme a inativação deste administrador.</p>
     <footer class="dialog-actions"><button id="cancel-status" class="button secondary" type="button">Cancelar</button><button id="confirm-status" class="button primary danger-action" type="button">Inativar administrador</button></footer>
   </div></dialog>
 
   <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
-  <script type="module" src="/administradores.js"></script>
+  <script type="module" src="/administradores.js?v=20261117-ui-polish"></script>
+  <script type="module" src="/split-text.mjs?v=20261117-ui-polish"></script>
 </body>
 </html>

@@ -1,7 +1,10 @@
 [CmdletBinding()]
 param(
     [string] $OutputRoot,
-    [string] $ReleaseId
+    [string] $ReleaseId,
+    [string] $ValidationReportPath,
+    [string] $PlaywrightModulePath,
+    [string] $BrowserOutputPath
 )
 
 Set-StrictMode -Version Latest
@@ -49,6 +52,8 @@ $publishArguments = @(
     '--self-contained', 'true',
     '--output', $appPath,
     '--no-restore',
+    '-m:1',
+    '-nr:false',
     '-p:PublishSingleFile=false',
     '-p:PublishTrimmed=false',
     '-p:DebugType=None',
@@ -102,6 +107,30 @@ Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tests\production\Test-Package
     -Destination (Join-Path $operationsPath 'tests')
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'tests\production\Test-PackagedBranding.ps1') `
     -Destination (Join-Path $operationsPath 'tests')
+foreach ($test in @('Test-PackagedSafety.ps1', 'Test-PackagedVisual.ps1')) {
+    Copy-Item -LiteralPath (Join-Path $repositoryRoot "tests\production\$test") -Destination (Join-Path $operationsPath 'tests')
+}
+Copy-Item -Path (Join-Path $repositoryRoot 'docs\release-*-visual-polish.md') -Destination (Join-Path $operationsPath 'docs')
+
+$validation = if (-not [string]::IsNullOrWhiteSpace($ValidationReportPath)) {
+    Get-Content -LiteralPath $ValidationReportPath -Raw | ConvertFrom-Json
+} else { $null }
+if ($null -ne $validation) {
+    if ($validation.status -ne 'passed') { throw 'O relatório pré-empacotamento não está aprovado.' }
+    $validation | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $packagePath 'validation-report.json') -Encoding UTF8
+}
+
+# Public source fingerprint: paths and hashes only, including pending visual changes.
+$sourceInventory = @(& git -C $repositoryRoot ls-files --cached --others --exclude-standard) |
+    Sort-Object -Unique | ForEach-Object {
+        $sourcePath = Join-Path $repositoryRoot $_
+        if (Test-Path -LiteralPath $sourcePath -PathType Leaf) {
+            "$((Get-FileHash -LiteralPath $sourcePath -Algorithm SHA256).Hash) *$_"
+        }
+    }
+$sourceInventory | Set-Content -LiteralPath (Join-Path $packagePath 'source-files.sha256') -Encoding UTF8
+$gitCommit = (& git -C $repositoryRoot rev-parse HEAD).Trim()
+$sourceTreeDirty = [bool](& git -C $repositoryRoot status --porcelain)
 
 $manifest = [ordered]@{
     releaseId = $ReleaseId
@@ -113,14 +142,58 @@ $manifest = [ordered]@{
     publishTrimmed = $false
     containsSecrets = $false
     databaseChanges = $false
-    change = 'brand-icons'
+    change = ($ReleaseId -replace '^\d+-', '')
+    sourceCommit = $gitCommit
+    sourceTreeDirty = $sourceTreeDirty
+    sourceSnapshotSha256 = (Get-FileHash -LiteralPath (Join-Path $packagePath 'source-files.sha256') -Algorithm SHA256).Hash
+    filesInventory = 'release-files.sha256'
+    securityReport = 'security-scan.json'
+    validationReport = if ($null -ne $validation) { 'validation-report.json' } else { $null }
+    productionAccessed = $false
+    databaseMigrationsExecuted = $false
+    backupsModified = $false
     includedTests = @(
         'operations/tests/Test-PackagedBranding.ps1',
-        'operations/tests/Test-PackagedCopyWiring.ps1'
+        'operations/tests/Test-PackagedCopyWiring.ps1',
+        'operations/tests/Test-PackagedSafety.ps1',
+        'operations/tests/Test-PackagedVisual.ps1',
+        'operations/tests/browser/visual-polish.cjs'
     )
     requiredMigration = $null
 }
 $manifest | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $packagePath 'release-manifest.json') -Encoding UTF8
+
+# Fail before compression if a publish accidentally copied local configuration or data.
+$safetyTest = Join-Path $operationsPath 'tests\Test-PackagedSafety.ps1'
+& $safetyTest -PackagePath $packagePath -SkipFileHashes |
+    ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $packagePath 'security-scan.json') -Encoding UTF8
+& (Join-Path $operationsPath 'tests\Test-PackagedBranding.ps1') -PackagePath $packagePath
+& (Join-Path $operationsPath 'tests\Test-PackagedCopyWiring.ps1') -PackagePath $packagePath
+$browserValidated = $false
+if (-not [string]::IsNullOrWhiteSpace($PlaywrightModulePath)) {
+    if ([string]::IsNullOrWhiteSpace($BrowserOutputPath)) {
+        $BrowserOutputPath = Join-Path $repositoryRoot ".codex-tmp\$ReleaseId-browser"
+    }
+    & (Join-Path $operationsPath 'tests\Test-PackagedVisual.ps1') -PackagePath $packagePath `
+        -PlaywrightModulePath $PlaywrightModulePath -OutputPath $BrowserOutputPath
+    $browserValidated = $true
+}
+if ($null -ne $validation) {
+    $validation | Add-Member -NotePropertyName packagedValidation -NotePropertyValue ([ordered]@{
+        branding = 'passed'
+        clipboardJavaScript = 'passed'
+        browser = if ($browserValidated) { 'passed' } else { 'not-run' }
+        security = 'passed'
+        apiMode = 'isolated fixtures; no database or production connection'
+    }) -Force
+    $validation | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $packagePath 'validation-report.json') -Encoding UTF8
+}
+$packageRoot = [IO.Path]::GetFullPath($packagePath).TrimEnd('\')
+Get-ChildItem -LiteralPath $packagePath -Recurse -File | Sort-Object FullName | ForEach-Object {
+    $relative = $_.FullName.Substring($packageRoot.Length + 1).Replace('\', '/')
+    "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash) *$relative"
+} | Set-Content -LiteralPath (Join-Path $packagePath 'release-files.sha256') -Encoding UTF8
+& $safetyTest -PackagePath $packagePath
 
 $compressed = $false
 for ($attempt = 1; $attempt -le 15 -and -not $compressed; $attempt++) {

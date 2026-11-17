@@ -60,6 +60,38 @@ Invoke-RestMethod http://localhost:5080/health
 
 Rotas públicas: `/login`, arquivos estáticos necessários e `/health`. As telas `/clientes` e `/importacao`, a API de clientes e toda a API de importação exigem autenticação.
 
+## Animação de texto
+
+Os títulos do login, clientes, importação e administradores usam uma adaptação em JavaScript puro do efeito de entrada
+escalonada [SplitText do React Bits](https://reactbits.dev/text-animations/split-text).
+Os arquivos locais `split-text.mjs` e `split-text.css` dispensam React, GSAP e npm.
+Para reutilizar em um título estático, carregue os dois arquivos e adicione
+`data-split-text="chars"` (letras) ou `data-split-text="words"` (palavras).
+Não aplique a elementos com marcação interna ou conteúdo atualizado dinamicamente.
+As variáveis CSS `--split-text-duration`, `--split-text-stagger` e
+`--split-text-distance` controlam duração, intervalo e deslocamento.
+A duração é de 240 ms, com intervalo de 12 ms e atraso máximo de 168 ms
+(total de até 408 ms). O efeito ocorre uma vez por carregamento, mantém o texto acessível e respeita
+`prefers-reduced-motion`; sem JavaScript, o título permanece visível.
+
+## Refinamento visual
+
+As quatro telas compartilham os tokens de cor, espaçamento, foco e movimento em
+`styles.css`. A paleta azul acompanha o logo oficial; os SVGs e ícones originais
+permanecem preservados. A navegação entre as três áreas também aparece no celular.
+
+O refinamento usa os princípios da Taste Skill, os snippets de modal e toast da
+Transitions Dev e a adaptação local do SplitText. Aberturas duram 250 ms, saídas de
+diálogo 150 ms e interações 80–150 ms. O `<dialog>` nativo continua responsável
+por foco, Escape e fechamento imediato da ação. Navegadores com suporte a
+`@starting-style` e `allow-discrete` exibem entrada/saída; nos demais, as ações
+continuam funcionando sem depender da animação. Movimento reduzido desativa os efeitos.
+
+A verificação visual isolada (sem conexão com banco real) pode ser executada com
+`node tests/browser/visual-polish.cjs`. O script usa Playwright instalado em
+`.codex-tmp/node_modules` ou indicado por `PLAYWRIGHT_MODULE_PATH` e Chrome local;
+`CHROME_PATH` permite escolher outro Chromium. Capturas ficam em `.codex-tmp/visual-polish`.
+
 ## API
 
 - `POST /api/auth/login`

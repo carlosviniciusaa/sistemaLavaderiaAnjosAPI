@@ -328,7 +328,7 @@ function selectManualCopyText() {
 }
 
 function showToast(message, isError = false) {
-  const toast = document.createElement("div"); toast.className = `toast${isError ? " error" : ""}`; toast.textContent = message; elements.toast_stack.appendChild(toast); setTimeout(() => toast.remove(), 3200);
+  const toast = document.createElement("div"); toast.className = `toast t-toast is-open${isError ? " error" : ""}`; toast.textContent = message; elements.toast_stack.appendChild(toast); setTimeout(() => toast.remove(), 3200);
 }
 
 function handleCopyInitializationError(error) {
@@ -339,7 +339,7 @@ function handleCopyInitializationError(error) {
 function handleApplicationInitializationError(error) {
   const stack = document.getElementById("toast-stack");
   if (stack) {
-    const toast = document.createElement("div"); toast.className = "toast error"; toast.textContent = "Não foi possível iniciar a tela de clientes. Atualize a página."; stack.appendChild(toast);
+    const toast = document.createElement("div"); toast.className = "toast t-toast is-open error"; toast.textContent = "Não foi possível iniciar a tela de clientes. Atualize a página."; stack.appendChild(toast);
   }
   logDevelopmentError("Falha ao inicializar a tela de clientes.", error);
 }

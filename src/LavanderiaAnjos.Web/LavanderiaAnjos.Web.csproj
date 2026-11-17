@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.9" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.*.json" CopyToPublishDirectory="Never" />
     <ProjectReference Include="..\LavanderiaAnjos.Application\LavanderiaAnjos.Application.csproj" />
     <ProjectReference Include="..\LavanderiaAnjos.Infrastructure\LavanderiaAnjos.Infrastructure.csproj" />
   </ItemGroup>
